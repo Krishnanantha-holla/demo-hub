@@ -53,6 +53,14 @@
       -webkit-appearance: none;
     }
 
+    select.custom-select:invalid {
+      color: #64748b; /* placeholder color */
+    }
+
+    select.custom-select option {
+      color: #0f172a; /* regular option text color */
+    }
+
     /* Smooth fade-in */
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(16px); }
@@ -119,9 +127,10 @@
           <div class="relative">
             <select
               id="department"
-              class="custom-select w-full px-4 py-3 rounded-xl border transition-all bg-white text-primary hover:border-primary-30 focus:border-primary focus:ring-2 focus:ring-primary-20 border-primary-10 focus:outline-none text-sm font-medium cursor-pointer"
+              required
+              class="custom-select w-full px-4 py-3 rounded-xl border transition-all bg-white hover:border-primary-30 focus:border-primary focus:ring-2 focus:ring-primary-20 border-primary-10 focus:outline-none text-sm font-medium cursor-pointer"
             >
-              <option value="" disabled selected>Select Department</option>
+              <option value="" disabled selected style="display:none;">Select Department</option>
             </select>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -137,10 +146,11 @@
           <div class="relative">
             <select
               id="semester"
+              required
               disabled
               class="custom-select w-full px-4 py-3 rounded-xl border transition-all bg-muted-50 cursor-not-allowed text-muted-foreground border-border focus:outline-none text-sm font-medium"
             >
-              <option value="" disabled selected>Select Semester</option>
+              <option value="" disabled selected style="display:none;">Select Semester</option>
             </select>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -156,10 +166,11 @@
           <div class="relative">
             <select
               id="subject"
+              required
               disabled
               class="custom-select w-full px-4 py-3 rounded-xl border transition-all bg-muted-50 cursor-not-allowed text-muted-foreground border-border focus:outline-none text-sm font-medium"
             >
-              <option value="" disabled selected>Select Subject</option>
+              <option value="" disabled selected style="display:none;">Select Subject</option>
             </select>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -175,10 +186,11 @@
           <div class="relative">
             <select
               id="module"
+              required
               disabled
               class="custom-select w-full px-4 py-3 rounded-xl border transition-all bg-muted-50 cursor-not-allowed text-muted-foreground border-border focus:outline-none text-sm font-medium"
             >
-              <option value="" disabled selected>Select Module</option>
+              <option value="" disabled selected style="display:none;">Select Module</option>
             </select>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -194,10 +206,11 @@
           <div class="relative">
             <select
               id="topic"
+              required
               disabled
               class="custom-select w-full px-4 py-3 rounded-xl border transition-all bg-muted-50 cursor-not-allowed text-muted-foreground border-border focus:outline-none text-sm font-medium"
             >
-              <option value="" disabled selected>Select Topic</option>
+              <option value="" disabled selected style="display:none;">Select Topic</option>
             </select>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -252,7 +265,7 @@
     const BASE_URL = 'http://localhost:3000/api';
 
     // ── Class constants ───────────────────────────────────────────
-    const ENABLED_CLS  = 'custom-select w-full px-4 py-3 rounded-xl border transition-all bg-white text-primary hover:border-primary-30 focus:border-primary focus:ring-2 focus:ring-primary-20 border-primary-10 focus:outline-none text-sm font-medium cursor-pointer';
+    const ENABLED_CLS  = 'custom-select w-full px-4 py-3 rounded-xl border transition-all bg-white hover:border-primary-30 focus:border-primary focus:ring-2 focus:ring-primary-20 border-primary-10 focus:outline-none text-sm font-medium cursor-pointer';
     const DISABLED_CLS = 'custom-select w-full px-4 py-3 rounded-xl border transition-all bg-muted-50 cursor-not-allowed text-muted-foreground border-border focus:outline-none text-sm font-medium';
 
     // ── Toast ──────────────────────────────────────────────────────
@@ -275,7 +288,7 @@
       sel.options.length = 1;
       items.forEach(function(item) {
         var opt = document.createElement('option');
-        opt.className = 'bg-white text-primary';
+        opt.className = 'bg-white text-slate-800';
         if (typeof item === 'object' && item !== null) {
           opt.value       = item[valueKey] != null ? item[valueKey] : item[labelKey];
           opt.textContent = item[labelKey];
@@ -284,12 +297,15 @@
         }
         sel.appendChild(opt);
       });
+      sel.selectedIndex = 0;
+      sel.value = "";
     }
 
     // ── Lock / Unlock ──────────────────────────────────────────────
     function lockSelect(id) {
       var sel = document.getElementById(id);
       sel.options.length = 1;
+      sel.selectedIndex = 0; // ensure placeholder is selected
       sel.disabled  = true;
       sel.className = DISABLED_CLS;
     }
@@ -345,7 +361,11 @@
       // Load semesters (they're global, not per-department, but we unlock after dept pick)
       try {
         var semesters = await fetchJSON('/semesters');
-        populateSelect('semester', semesters, 'id', 'semester_number');
+        // Format semester labels
+        var formattedSemesters = semesters.map(function(s) {
+          return { id: s.id, name: 'Semester ' + s.semester_number };
+        });
+        populateSelect('semester', formattedSemesters, 'id', 'name');
         unlockSelect('semester');
         console.info('[res_hub] Semesters loaded:', semesters.length);
       } catch (e) {
@@ -390,9 +410,11 @@
           var opt = document.createElement('option');
           opt.value = m.id;
           opt.textContent = m.module_number + ' \u2013 ' + m.module_title;
-          opt.className = 'bg-white text-primary';
+          opt.className = 'bg-white text-slate-800';
           sel.appendChild(opt);
         });
+        sel.selectedIndex = 0;
+        sel.value = "";
         unlockSelect('module');
         console.info('[res_hub] Modules loaded:', modules.length);
       } catch (e) {
