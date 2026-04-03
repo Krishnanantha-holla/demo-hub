@@ -208,6 +208,11 @@ app.use(function (req, res, next) {
 // Static files from public/ only
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ─── Health check for Railway (no DB required) ───────────────────────────────
+app.get('/health', function (req, res) {
+  res.json({ status: 'ok' });
+});
+
 // ─── API: Ping (instant, no DB) ──────────────────────────────────────────────
 app.get('/api/ping', function (req, res) {
   res.json({ status: 'ok', dbReady: dbReady, timestamp: new Date().toISOString() });
