@@ -369,7 +369,10 @@ app.post('/api/search', async (req, res) => {
 });
 
 // ─── Fallback: serve index.html for SPA ──────────────────────────────────────
-app.get('*', (req, res) => {
+// Using app.use() instead of app.get('*') because Express 5 (path-to-regexp v8)
+// no longer supports unnamed wildcard '*'. app.use() catches all unmatched
+// requests regardless of HTTP method, which is the correct SPA fallback pattern.
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
