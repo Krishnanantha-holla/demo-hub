@@ -8,18 +8,19 @@ const { Pool } = require('pg');
 
 // ─── Configuration ───────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
-const DATABASE_URL = process.env.DATABASE_URL;
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://localhost:5432/res_hub';
 
-if (!DATABASE_URL) {
-  console.error('[res_hub] ❌ DATABASE_URL environment variable is not set.');
-  console.error('[res_hub]    Set it via: export DATABASE_URL="postgresql://user:pass@host:5432/dbname"');
-  process.exit(1);
+if (!process.env.DATABASE_URL) {
+  console.warn('[res_hub] ⚠️  DATABASE_URL not set — using local fallback: postgresql://localhost:5432/res_hub');
+  console.warn('[res_hub]    For Railway: set DATABASE_URL via ${{Postgres.DATABASE_URL}} reference variable');
 }
 
 // ─── PostgreSQL Pool ─────────────────────────────────────────────────────────
+const isSSL = DATABASE_URL.includes('railway') || DATABASE_URL.includes('neon') || process.env.NODE_ENV === 'production';
+
 const pool = new Pool({
   connectionString: DATABASE_URL,
-  ssl: { rejectUnauthorized: false }, // Required for Railway
+  ssl: isSSL ? { rejectUnauthorized: false } : false,
   max: 10,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
