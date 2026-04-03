@@ -1,12 +1,13 @@
 {
   "name": "res_hub",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "PESITM Resource Hub – Academic resource browser",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
-  "keywords": [],
+  "keywords": ["education", "resources", "pesitm"],
   "author": "",
   "license": "ISC",
   "dependencies": {
